@@ -64,4 +64,12 @@ class SpreadSheetController:
             await update.message.reply_text(f"Sheet: {title} deleted successfully")
         return add
     
-    
+    def get_worksheets(self):
+        async def add(update:Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+            worksheets = self.spreadsheet_service.get_worksheets()
+            message = "Sheets:\n"
+            for name in worksheets:
+                message += f"{name}\n"
+                
+            await update.message.reply_text(message)
+        return add

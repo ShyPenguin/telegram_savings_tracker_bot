@@ -36,6 +36,11 @@ class SheetManager(ABC):
         print(f"Setting worksheet to {self, title}...")
         self._worksheet_title = self, title
     
+    def get_worksheets(self):
+        worksheets = self._get_worksheets()
+        
+        return list(map(lambda worksheet: worksheet["title"], worksheets))
+    
     def add_worksheet(self, title: str):
         request = {
             "requests": [
