@@ -12,7 +12,7 @@ class SpreadSheetController:
             await update.message.reply_text("Hello world!")  # type: ignore
         return hello
     
-    def add(self):
+    def add_item(self):
         async def add(update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             if not context.args or len(context.args) < 2:
                 await update.message.reply_text(  # type: ignore
@@ -41,3 +41,27 @@ class SpreadSheetController:
             )
             await update.message.reply_text("Item appended successfully.")  # type: ignore
         return add
+    
+    def add_worksheet(self):
+        async def add(update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+            if not context.args or len(context.args) < 1:
+                await update.message.reply_text(  # type: ignore
+                    "Usage: /add_worksheet <worksheet_title> \nExample: /add_worksheet Sheet2"
+                )
+            title = context.args[0]
+            self.spreadsheet_service.add_worksheet(title=title)
+            await update.message.reply_text(f"Sheet: {title} added successfully")
+        return add
+
+    def delete_worksheet(self):
+        async def add(update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+            if not context.args or len(context.args) < 1:
+                await update.message.reply_text(  # type: ignore
+                    "Usage: /delete_worksheet <worksheet_title> \nExample: /delete_worksheet Sheet2"
+                )
+            title = context.args[0]
+            self.spreadsheet_service.delete_worksheet(title=title)
+            await update.message.reply_text(f"Sheet: {title} deleted successfully")
+        return add
+    
+    

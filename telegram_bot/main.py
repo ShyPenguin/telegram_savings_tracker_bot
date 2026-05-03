@@ -13,15 +13,14 @@ def build_application():
     app = ApplicationBuilder().token(token).build()
     
     spread_controller = SpreadSheetController()
-    app.add_handler(CommandHandler("add_item", spread_controller.add()))
+    app.add_handler(CommandHandler("add_item", spread_controller.add_item()))
+    app.add_handler(CommandHandler("add_worksheet", spread_controller.add_worksheet()))
+    app.add_handler(CommandHandler("delete_worksheet", spread_controller.delete_worksheet()))
     app.add_handler(CommandHandler("hello", spread_controller.hello()))
     return app
 
 
 def main(): 
     print("Savings tracker bot is running...")
-    # app = build_application()
-    # app.run_polling()
-    spread_service = SpreadSheetService()
-    spread_service.delete_worksheet("Sheet2")
-    spread_service.add_worksheet("Sheet2")
+    app = build_application()
+    app.run_polling()
