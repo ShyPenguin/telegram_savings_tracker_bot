@@ -20,5 +20,8 @@ def build_application():
 
 def main(): 
     print("Savings tracker bot is running...")
-    app = build_application()
-    app.run_polling()
+    # app = build_application()
+    # app.run_polling()
+    spread_service = SpreadSheetService()
+    spread_service.delete_worksheet("Sheet2")
+    spread_service.add_worksheet("Sheet2")

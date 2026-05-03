@@ -53,11 +53,25 @@ class SheetManager(ABC):
             spreadsheetId=self.spreadsheet_id,
             body=request
         ).execute()
-
-        worksheet_title = response["replies"][0]["addSheet"]["properties"]["sheetId"]
+        
+        worksheet_properties = response["replies"][0]["addSheet"]["properties"]
+        self.set_header_row(title)
+        worksheet_title = worksheet_properties["title"]
         return worksheet_title
     
-    def delete_sheet(self, title: str) -> None:
+    def set_header_row(self, worksheet_title):
+        values = [
+            ["Date", "Amount", "Notes", "Total"]
+        ]
+
+        self.spreadsheets_api.values().update(
+            spreadsheetId=self.spreadsheet_id,
+            range=f"{worksheet_title}!A1",
+            valueInputOption="RAW",
+            body={"values": values}
+        ).execute()
+        
+    def delete_worksheet(self, title: str) -> None:
         worksheet = self._get_worksheet_by_title(title)
         
         request = {
