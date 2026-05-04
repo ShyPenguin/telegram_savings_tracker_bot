@@ -12,4 +12,7 @@ wheels/
 # Environemt
 .env
 auth/
+
+# Others
 spreadsheet.json
+playground.py

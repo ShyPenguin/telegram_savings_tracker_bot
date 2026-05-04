@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 def sum_data(data: list, has_header=False):
     """
@@ -19,11 +19,26 @@ def sum_data(data: list, has_header=False):
 
     return total
 
-def filter_by_date(data: list, day=None, month=None, year=None):
+def summarize_items(data: list):
+    income_items = filter_by_purchase(data, positive=True)
+    expense_items = filter_by_purchase(data, positive=False)
+    income_total = sum_data(income_items)
+    expense_total = sum_data(expense_items)
+    net_total = sum_data(data, has_header=True)
+    
+    return {
+        "count": len(data),
+        "income_total": round(income_total, 2),
+        "expense_total": round(expense_total, 2),
+        "net_total": round(net_total, 2),         
+    }
+
+def filter_by_date(data: list, start_date: datetime, end_date: datetime):
     """
     Filters the data by a specific date.
     """
     filtered_data = []
+    
     try:
         for idx, row in enumerate(data):
             if idx == 0: 
@@ -31,17 +46,30 @@ def filter_by_date(data: list, day=None, month=None, year=None):
                 continue # skips header
             date_str = row[0]
             date = datetime.strptime(date_str, "%m/%d/%Y")
-            if date and day and date.day != int(day):
+            if date < start_date:
                 continue
-            if date and month and date.month != int(month):
-                continue
-            if date and year and date.year != int(year):
+            if date > end_date:
                 continue
             filtered_data.append(row)
     except Exception as e:
         print(f"Error filtering by date: {e}")
 
     return filtered_data
+
+def filter_items(
+    data,
+    start_date: datetime,
+    end_date: datetime,
+    purchase_type=None,
+):
+    filtered = filter_by_date(data, start_date, end_date)
+
+    if purchase_type == "income":
+        return filter_by_purchase(filtered, positive=True)
+    if purchase_type == "expense":
+        return filter_by_purchase(filtered, positive=False)
+    return filtered
+
 
 def filter_by_purchase(data: list, positive=True):
     """

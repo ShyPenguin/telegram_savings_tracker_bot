@@ -4,7 +4,7 @@ import os
 from utils.index import extract_google_doc_id
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
-from .helper import filter_by_purchase, sum_data
+from .helper import filter_by_purchase, sum_data, summarize_items
 
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
@@ -108,18 +108,7 @@ class SheetManager(ABC):
     def summarize_worksheet(self)-> str:
         data = self.read_worksheet()
         
-        income_items = filter_by_purchase(data, positive=True)
-        expense_items = filter_by_purchase(data, positive=False)
-        income_total = sum_data(income_items)
-        expense_total = sum_data(expense_items)
-        net_total = sum_data(data, has_header=True)
-        
-        summary_data = {
-            "count": len(data),
-            "income_total": round(income_total, 2),
-            "expense_total": round(expense_total, 2),
-            "net_total": round(net_total, 2), 
-        }
+        summary_data = summarize_items(data)
         
         message = (
             f"Summary ({self._worksheet_title})\n"

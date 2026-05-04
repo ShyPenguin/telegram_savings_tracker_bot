@@ -1,7 +1,10 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from datetime import datetime
-from .service import SpreadSheetService
+from .helper import parse_filter_args
+
+from gs_savings_tracker import SpreadSheetService
+
 
 class SpreadSheetController:
     def __init__(self):
@@ -10,6 +13,7 @@ class SpreadSheetController:
     async def hello(update:Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Hello world!")  # type: ignore
 
+#Arg: amount=str note=str
     async def add_item(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args or len(context.args) < 2:
             await update.message.reply_text(  # type: ignore
@@ -37,7 +41,8 @@ class SpreadSheetController:
             values=values
         )
         await update.message.reply_text("Item appended successfully.")  # type: ignore
-
+        
+# Arg: title=str
     async def add_worksheet(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args or len(context.args) < 1:
             await update.message.reply_text(  # type: ignore
@@ -67,4 +72,13 @@ class SpreadSheetController:
     async def summary(self, update:Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         message = self.spreadsheet_service.summarize_worksheet()
         
+        await update.message.reply_text(message)
+        
+# Arg: start_day=int start_month=int start_year=int end_day=int end_month=int end_year=int
+    async def filter(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        start_date, end_date = parse_filter_args(context.args)
+        
+        message = self.spreadsheet_service.filter_items_by_date(start_date, end_date)
+        
+        print(message)
         await update.message.reply_text(message)
