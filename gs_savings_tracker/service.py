@@ -10,11 +10,10 @@ class SpreadSheetService(SheetManager):
         }
         result = self.spreadsheets_api.values().append(
             spreadsheetId=self.spreadsheet_id,
-            range=self._worksheet_title,
+            range=self.get_current_worksheet(),
             valueInputOption="USER_ENTERED",
             insertDataOption="INSERT_ROWS",  # ensures new rows are added
             body=body
         ).execute()
 
         print(f"{result.get('updates').get('updatedCells')} cells appended.")
-        

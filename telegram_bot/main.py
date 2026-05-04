@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from telegram.ext import ApplicationBuilder, CommandHandler
-from gs_expenses_tracker import SpreadSheetController, SpreadSheetService
+from gs_savings_tracker import SpreadSheetController, SpreadSheetService
 import dotenv
 import os
 
@@ -13,11 +15,12 @@ def build_application():
     app = ApplicationBuilder().token(token).build()
     
     spread_controller = SpreadSheetController()
-    app.add_handler(CommandHandler("add_item", spread_controller.add_item()))
-    app.add_handler(CommandHandler("add_worksheet", spread_controller.add_worksheet()))
-    app.add_handler(CommandHandler("delete_worksheet", spread_controller.delete_worksheet()))
-    app.add_handler(CommandHandler("get_worksheets", spread_controller.get_worksheets()))
-    app.add_handler(CommandHandler("hello", spread_controller.hello()))
+    app.add_handler(CommandHandler("add_item", spread_controller.add_item))
+    app.add_handler(CommandHandler("add_worksheet", spread_controller.add_worksheet))
+    app.add_handler(CommandHandler("delete_worksheet", spread_controller.delete_worksheet))
+    app.add_handler(CommandHandler("get_worksheets", spread_controller.get_worksheets))
+    app.add_handler(CommandHandler("summary", spread_controller.summary))
+    app.add_handler(CommandHandler("hello", spread_controller.hello))
     return app
 
 

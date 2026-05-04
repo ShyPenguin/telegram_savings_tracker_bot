@@ -4,6 +4,7 @@ import os
 from utils.index import extract_google_doc_id
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+from .helper import filter_by_purchase, sum_data
 
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
@@ -28,7 +29,6 @@ class SheetManager(ABC):
         return creds
     
     def get_current_worksheet(self):
-        print("Getting worksheet_title...")
         return self._worksheet_title
 
     def set_current_worksheet(self, title):
@@ -41,6 +41,16 @@ class SheetManager(ABC):
         
         return list(map(lambda worksheet: worksheet["title"], worksheets))
     
+    def read_worksheet(self):
+        self._ensure_target_worksheet_exists(self._worksheet_title)
+        result = self.spreadsheets_api.values().get(
+            spreadsheetId=self.spreadsheet_id, range=self._worksheet_title
+        ).execute()
+        values = result.get("values", [])
+        # ignores empty cells
+        values = [row for row in values if any(cell.strip() for cell in row)]
+        return values
+        
     def add_worksheet(self, title: str):
         request = {
             "requests": [
@@ -60,11 +70,11 @@ class SheetManager(ABC):
         ).execute()
         
         worksheet_properties = response["replies"][0]["addSheet"]["properties"]
-        self.set_header_row(title)
+        self._set_header_row(title)
         worksheet_title = worksheet_properties["title"]
         return worksheet_title
     
-    def set_header_row(self, worksheet_title):
+    def _set_header_row(self, worksheet_title):
         values = [
             ["Date", "Amount", "Notes", "Total"]
         ]
@@ -95,7 +105,33 @@ class SheetManager(ABC):
         ).execute()
         print(f"Sheet: {title} is successfully deleted.")
     
-    def _get_worksheet_by_title(self, title: str):
+    def summarize_worksheet(self)-> str:
+        data = self.read_worksheet()
+        
+        income_items = filter_by_purchase(data, positive=True)
+        expense_items = filter_by_purchase(data, positive=False)
+        income_total = sum_data(income_items)
+        expense_total = sum_data(expense_items)
+        net_total = sum_data(data, has_header=True)
+        
+        summary_data = {
+            "count": len(data),
+            "income_total": round(income_total, 2),
+            "expense_total": round(expense_total, 2),
+            "net_total": round(net_total, 2), 
+        }
+        
+        message = (
+            f"Summary ({self._worksheet_title})\n"
+            f"- Count: {summary_data['count']}\n"
+            f"- Income: ₱{summary_data['income_total']:,.2f}\n"
+            f"- Expense: ₱{summary_data['expense_total']*-1:,.2f}\n"
+            f"- Net: ₱{summary_data['net_total']:,.2f}"
+        )
+            
+        return message
+        
+    def _get_worksheet_by_title(self, title: str) -> list[str]:
         worksheets = self._get_worksheets()
         filtered_worksheets = list(filter(lambda worksheet: worksheet["title"] == title, worksheets))
         if len(filtered_worksheets) < 1:
@@ -115,3 +151,5 @@ class SheetManager(ABC):
         worksheet_titles = list(map(lambda worksheet: worksheet["title"], worksheets))
         if target_sheet not in worksheet_titles:
             raise ValueError(f"Target sheet '{target_sheet}' does not exist.")
+        
+    
