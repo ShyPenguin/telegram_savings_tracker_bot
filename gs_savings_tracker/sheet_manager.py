@@ -4,7 +4,7 @@ import os
 from utils.index import extract_google_doc_id
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
-from .helper import filter_by_purchase, sum_data, summarize_items
+from .helpers import summarize_items
 
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
