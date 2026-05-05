@@ -34,7 +34,7 @@ class SheetManager(ABC):
     def set_current_worksheet(self, title):
         self._ensure_target_worksheet_exists(self, title)
         print(f"Setting worksheet to {self, title}...")
-        self._worksheet_title = self, title
+        self._worksheet_title = title
     
     def get_worksheets(self):
         worksheets = self._get_worksheets()

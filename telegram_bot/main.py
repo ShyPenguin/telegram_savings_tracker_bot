@@ -20,6 +20,7 @@ def build_application():
     app.add_handler(CommandHandler("get_worksheets", spread_controller.get_worksheets))
     app.add_handler(CommandHandler("filter", spread_controller.filter))
     app.add_handler(CommandHandler("summary", spread_controller.summary))
+    app.add_handler(CommandHandler("help", spread_controller.help))
     app.add_handler(CommandHandler("hello", spread_controller.hello))
     return app
 

@@ -10,9 +10,23 @@ class SpreadSheetController:
     def __init__(self):
         self.spreadsheet_service = SpreadSheetService()
         
-    async def hello(update:Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+    async def hello(_, update:Update, _c: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Hello world!")  # type: ignore
-
+        
+    async def help(_, update:Update, _c: ContextTypes.DEFAULT_TYPE) -> None:
+        message = (
+            "Available commands:\n"
+            "/add_item <amount> <note> - Append a new savings entry\n"
+            "/add_worksheet <title> - Add a new worksheet\n"
+            "/delete_worksheet <title> - Delete a worksheet\n"
+            "/get_worksheets - Lists all worksheet\n"
+            "/filter start_day=<d> start_month=<m> start_year=<y>"
+            "end_day=<d> end_month=<m> end_year=<y> - Filter and summarize\n"
+            "/help - Show this message"
+        )
+        
+        await update.message.reply_text(message)
+        
 #Arg: amount=str note=str
     async def add_item(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args or len(context.args) < 2:
