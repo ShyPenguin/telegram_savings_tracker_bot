@@ -19,7 +19,7 @@ class SheetManager(ABC):
         self.creds = self._get_credentials()
         self.spreadsheet_id = extract_google_doc_id(os.getenv("TEST_URL"))
         self.spreadsheets_api = build("sheets", "v4", credentials=self.creds).spreadsheets()
-        self._worksheet_title = "Sheet1";
+        self._active_worksheet_title = "Sheet1";
 
     def _get_credentials(self):
         creds = Credentials.from_service_account_file(
@@ -28,23 +28,31 @@ class SheetManager(ABC):
         )
         return creds
     
-    def get_current_worksheet(self):
-        return self._worksheet_title
+    def get_active_worksheet(self):
+        return self._active_worksheet_title
 
-    def set_current_worksheet(self, title):
-        self._ensure_target_worksheet_exists(self, title)
-        print(f"Setting worksheet to {self, title}...")
-        self._worksheet_title = title
+    def set_active_worksheet(self, title):
+        self._ensure_target_worksheet_exists(title)
+        print(f"Setting active worksheet to {title}...")
+        self._active_worksheet_title = title
     
-    def get_worksheets(self):
+    def get_worksheets_title(self):
         worksheets = self._get_worksheets()
         
-        return list(map(lambda worksheet: worksheet["title"], worksheets))
+        worksheets_titles = []
+        for worksheet in worksheets:
+            if worksheet["title"] == self._active_worksheet_title:
+                worksheets_titles.append(f"{self._active_worksheet_title} (active)")
+                continue
+            
+            worksheets_titles.append(worksheet["title"])
+            
+        return worksheets_titles
     
     def read_worksheet(self):
-        self._ensure_target_worksheet_exists(self._worksheet_title)
+        self._ensure_target_worksheet_exists(self._active_worksheet_title)
         result = self.spreadsheets_api.values().get(
-            spreadsheetId=self.spreadsheet_id, range=self._worksheet_title
+            spreadsheetId=self.spreadsheet_id, range=self._active_worksheet_title
         ).execute()
         values = result.get("values", [])
         # ignores empty cells
@@ -111,7 +119,7 @@ class SheetManager(ABC):
         summary_data = summarize_items(data)
         
         message = (
-            f"Summary ({self._worksheet_title})\n"
+            f"Summary ({self._active_worksheet_title})\n"
             f"- Count: {summary_data['count']}\n"
             f"- Income: ₱{summary_data['income_total']:,.2f}\n"
             f"- Expense: ₱{summary_data['expense_total']*-1:,.2f}\n"
@@ -135,10 +143,10 @@ class SheetManager(ABC):
         )
         return [sheet['properties'] for sheet in spreadsheet["sheets"]]
       
-    def _ensure_target_worksheet_exists(self, target_sheet: str):
+    def _ensure_target_worksheet_exists(self, target_worksheet: str):
         worksheets = self._get_worksheets()
         worksheet_titles = list(map(lambda worksheet: worksheet["title"], worksheets))
-        if target_sheet not in worksheet_titles:
-            raise ValueError(f"Target sheet '{target_sheet}' does not exist.")
+        if target_worksheet not in worksheet_titles:
+            raise ValueError(f"Target sheet '{target_worksheet}' does not exist.")
         
     

@@ -16,10 +16,12 @@ class SpreadSheetController:
     async def help(_, update:Update, _c: ContextTypes.DEFAULT_TYPE) -> None:
         message = (
             "Available commands:\n"
-            "/add_item <amount> <note> - Append a new savings entry\n"
-            "/add_worksheet <title> - Add a new worksheet\n"
-            "/delete_worksheet <title> - Delete a worksheet\n"
-            "/get_worksheets - Lists all worksheet\n"
+            "/item_add <amount> <note> - Append a new savings entry\n"
+            "/worksheet_add <title> - Add a new worksheet\n"
+            "/worksheet_delete <title> - Delete a worksheet\n"
+            "/worksheets_get - Lists all worksheet\n"
+            "/active_worksheet - Show active worksheet\n"
+            "/active_worksheet <title> - Change active worksheet\n"
             "/filter start_day=<d> start_month=<m> start_year=<y>"
             "end_day=<d> end_month=<m> end_year=<y> - Filter and summarize\n"
             "/help - Show this message"
@@ -28,7 +30,7 @@ class SpreadSheetController:
         await update.message.reply_text(message)
         
 #Arg: amount=str note=str
-    async def add_item(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def item_add(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args or len(context.args) < 2:
             await update.message.reply_text(  # type: ignore
                 "Usage: /add <amount> <note>\nExample: /add 250 groceries"
@@ -57,26 +59,26 @@ class SpreadSheetController:
         await update.message.reply_text("Item appended successfully.")  # type: ignore
         
 # Arg: title=str
-    async def add_worksheet(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        if not context.args or len(context.args) < 1:
+    async def worksheet_add(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        if not context.args:
             await update.message.reply_text(  # type: ignore
-                "Usage: /add_worksheet <worksheet_title> \nExample: /add_worksheet Sheet2"
+                "Usage: /worksheet_add <worksheet_title> \nExample: /worksheet_add Sheet2"
             )
         title = context.args[0]
         self.spreadsheet_service.add_worksheet(title=title)
         await update.message.reply_text(f"Sheet: {title} added successfully")
 
-    async def delete_worksheet(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        if not context.args or len(context.args) < 1:
+    async def worksheet_delete(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        if not context.args:
             await update.message.reply_text(  # type: ignore
-                "Usage: /delete_worksheet <worksheet_title> \nExample: /delete_worksheet Sheet2"
+                "Usage: /worksheet_delete <worksheet_title> \nExample: /worksheet_delete Sheet2"
             )
         title = context.args[0]
         self.spreadsheet_service.delete_worksheet(title=title)
         await update.message.reply_text(f"Sheet: {title} deleted successfully")
     
-    async def get_worksheets(self, update:Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        worksheets = self.spreadsheet_service.get_worksheets()
+    async def worksheets_get(self, update:Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        worksheets = self.spreadsheet_service.get_worksheets_title()
         message = "Sheets:\n"
         for name in worksheets:
             message += f"{name}\n"
@@ -96,3 +98,33 @@ class SpreadSheetController:
         
         print(message)
         await update.message.reply_text(message)
+    
+    async def active_worksheet(self, update:Update, context:ContextTypes.DEFAULT_TYPE) -> None:
+        
+        if not context.args:
+            await update.message.reply_text(  # type: ignore
+                f"Active worksheet: {self.spreadsheet_service.get_active_worksheet()}"
+            )
+            return
+    
+        if len(context.args) > 1:
+            await update.message.reply_text(  # type: ignore
+                "Usage: /active_worksheet <worksheet_title> \nExample: /active_worksheet Sheet2"
+            )
+            
+            
+        title = context.args[0]
+        
+        try:
+            self.spreadsheet_service.set_active_worksheet(title)
+        except ValueError:
+            available_sheet_names = self.spreadsheet_service.get_worksheets_title()
+            await update.message.reply_text(  # type: ignore
+                f'Worksheet "{title}" does not exist.\n'
+                f"Available worksheets:\n{'\n'.join(available_sheet_names)}"
+            )
+            return
+        
+        await update.message.reply_text(f"Active worksheet changed to: {self.spreadsheet_service.get_active_worksheet()}")
+
+        

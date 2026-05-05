@@ -14,7 +14,7 @@ class SpreadSheetService(SheetManager):
         }
         result = self.spreadsheets_api.values().append(
             spreadsheetId=self.spreadsheet_id,
-            range=self.get_current_worksheet(),
+            range=self.get_active_worksheet(),
             valueInputOption="USER_ENTERED",
             insertDataOption="INSERT_ROWS",  # ensures new rows are added
             body=body
@@ -28,7 +28,7 @@ class SpreadSheetService(SheetManager):
         filtered_summary = summarize_items(filtered_items)
         
         message = (
-            f"Filtered ({self.get_current_worksheet()})\n"
+            f"Filtered ({self.get_active_worksheet()})\n"
             f"- Items: {filtered_summary['count']}\n"
             f"- Income: ₱{filtered_summary['income_total']:,.2f}\n"
             f"- Expense: ₱{filtered_summary['expense_total']*-1:,.2f}\n"
