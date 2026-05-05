@@ -2,9 +2,9 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from datetime import datetime
 from .helper import parse_filter_args
+import json
 
 from gs_savings_tracker import SpreadSheetService
-
 
 class SpreadSheetController:
     def __init__(self):
@@ -64,8 +64,17 @@ class SpreadSheetController:
             await update.message.reply_text(  # type: ignore
                 "Usage: /worksheet_add <worksheet_title> \nExample: /worksheet_add Sheet2"
             )
+            return
         title = context.args[0]
-        self.spreadsheet_service.add_worksheet(title=title)
+        
+        try:
+            self.spreadsheet_service.add_worksheet(title=title)
+        except Exception as e:
+            message = "Something went wrong"
+            if "already exists. Please enter another name." in str(e):
+                message = f'"{title}" already exists. Please enter another name'
+            return await update.message.reply_text(f"{message}")
+        
         await update.message.reply_text(f"Sheet: {title} added successfully")
 
     async def worksheet_delete(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -73,8 +82,19 @@ class SpreadSheetController:
             await update.message.reply_text(  # type: ignore
                 "Usage: /worksheet_delete <worksheet_title> \nExample: /worksheet_delete Sheet2"
             )
+            return
+        
         title = context.args[0]
-        self.spreadsheet_service.delete_worksheet(title=title)
+        if title == self.spreadsheet_service.get_active_worksheet():
+            await update.message.reply_text("Cannot delete active worksheet")
+            return
+        
+        try:
+            self.spreadsheet_service.delete_worksheet(title=title)
+        except ValueError as e:
+            await update.message.reply_text(f"{e}")
+            return
+        
         await update.message.reply_text(f"Sheet: {title} deleted successfully")
     
     async def worksheets_get(self, update:Update, _: ContextTypes.DEFAULT_TYPE) -> None:
@@ -87,16 +107,17 @@ class SpreadSheetController:
 
     async def summary(self, update:Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         message = self.spreadsheet_service.summarize_worksheet()
-        
         await update.message.reply_text(message)
         
 # Arg: start_day=int start_month=int start_year=int end_day=int end_month=int end_year=int
     async def filter(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        start_date, end_date = parse_filter_args(context.args)
-        
+        try:
+            start_date, end_date = parse_filter_args(context.args)
+        except Exception:
+            await update.message.reply_text("Usage:\n/filter start_day=<d> start_month=<m> start_year=<y> end_day=<d> end_month=<m> end_year=<y> - Filter and summarize")
+            return    
         message = self.spreadsheet_service.filter_items_by_date(start_date, end_date)
         
-        print(message)
         await update.message.reply_text(message)
     
     async def active_worksheet(self, update:Update, context:ContextTypes.DEFAULT_TYPE) -> None:
@@ -111,6 +132,7 @@ class SpreadSheetController:
             await update.message.reply_text(  # type: ignore
                 "Usage: /active_worksheet <worksheet_title> \nExample: /active_worksheet Sheet2"
             )
+            return 
             
             
         title = context.args[0]

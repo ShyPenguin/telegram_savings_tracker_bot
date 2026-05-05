@@ -11,6 +11,7 @@ def parse_filter_args(
     end_day = None
     end_month = None
     end_year = None
+    
     for arg in args:
         if arg.startswith("start_day="):
             start_day = arg.split("=", 1)[1]
@@ -24,6 +25,8 @@ def parse_filter_args(
             end_month = arg.split("=", 1)[1]
         elif arg.startswith("end_year="):
             end_year = arg.split("=", 1)[1]
-    start_date = datetime.strptime(start_month + "/"  + start_day + "/" + start_year, "%m/%d/%Y")
-    end_date = datetime.strptime(end_month + "/"  + end_day + "/" + end_year, "%m/%d/%Y") 
+
+        start_date = datetime.strptime(start_month + "/"  + start_day + "/" + start_year, "%m/%d/%Y")
+        end_date = datetime.strptime(end_month + "/"  + end_day + "/" + end_year, "%m/%d/%Y") 
+        
     return start_date, end_date

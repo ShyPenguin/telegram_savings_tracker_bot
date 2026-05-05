@@ -71,12 +71,12 @@ class SheetManager(ABC):
                 }
             ]
         }
-
+        
         response = self.spreadsheets_api.batchUpdate(
             spreadsheetId=self.spreadsheet_id,
             body=request
         ).execute()
-        
+                
         worksheet_properties = response["replies"][0]["addSheet"]["properties"]
         self._set_header_row(title)
         worksheet_title = worksheet_properties["title"]
