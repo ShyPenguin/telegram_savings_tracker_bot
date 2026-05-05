@@ -70,6 +70,7 @@ class SpreadSheetController:
         try:
             self.spreadsheet_service.add_worksheet(title=title)
         except Exception as e:
+            print(e)
             message = "Something went wrong"
             if "already exists. Please enter another name." in str(e):
                 message = f'"{title}" already exists. Please enter another name'

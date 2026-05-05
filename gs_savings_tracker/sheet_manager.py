@@ -78,10 +78,58 @@ class SheetManager(ABC):
         ).execute()
                 
         worksheet_properties = response["replies"][0]["addSheet"]["properties"]
-        self._set_header_row(title)
+        self._initialize_worksheet(worksheet_properties["sheetId"])
         worksheet_title = worksheet_properties["title"]
         return worksheet_title
     
+    
+    def _initialize_worksheet(self, sheet_id):
+        request = {
+            "requests": [
+                {
+                    "updateCells": {
+                        "start": {
+                        "sheetId": sheet_id,  # tricky part!
+                        "rowIndex": 0,
+                        "columnIndex": 0
+                        },
+                        "rows": [
+                        {
+                            "values": [
+                            {"userEnteredValue": {"stringValue": "Name"}},
+                            {"userEnteredValue": {"stringValue": "Email"}},
+                            {"userEnteredValue": {"stringValue": "Age"}}
+                            ]
+                        }
+                        ],
+                        "fields": "userEnteredValue"
+                    }                           
+                },{
+                    
+                    "repeatCell": {
+                        "range": {
+                            "sheetId": sheet_id,
+                            "startColumnIndex": 1,  # Column B (0-based index)
+                            "endColumnIndex": 2
+                        },
+                        "cell": {
+                            "userEnteredFormat": {
+                                "numberFormat": {
+                                    "type": "CURRENCY",
+                                    "pattern": "₱#,##0.00"
+                                }
+                            }
+                        },
+                        "fields": "userEnteredFormat.numberFormat"
+                    }                                                
+                }
+            ]
+        }
+        self.spreadsheets_api.batchUpdate(
+            spreadsheetId=self.spreadsheet_id,
+            body=request
+        ).execute()
+        
     def _set_header_row(self, worksheet_title):
         values = [
             ["Date", "Amount", "Notes", "Total"]
@@ -94,6 +142,35 @@ class SheetManager(ABC):
             body={"values": values}
         ).execute()
         
+    def _format_column_as_peso(self, sheet_id):
+        request = {
+            "requests": [
+                {
+                    "repeatCell": {
+                        "range": {
+                            "sheetId": sheet_id,
+                            "startColumnIndex": 1,  # Column B (0-based index)
+                            "endColumnIndex": 2
+                        },
+                        "cell": {
+                            "userEnteredFormat": {
+                                "numberFormat": {
+                                    "type": "CURRENCY",
+                                    "pattern": "₱#,##0.00"
+                                }
+                            }
+                        },
+                        "fields": "userEnteredFormat.numberFormat"
+                    }
+                }
+            ]
+        }
+
+        self.spreadsheets_api.batchUpdate(
+            spreadsheetId=self.spreadsheet_id,
+            body=request
+        ).execute()
+       
     def delete_worksheet(self, title: str) -> None:
         worksheet = self._get_worksheet_by_title(title)
         
@@ -134,7 +211,7 @@ class SheetManager(ABC):
         if len(filtered_worksheets) < 1:
             raise ValueError(f"Target sheet `{title}` does not exist.")
         return filtered_worksheets[0]
-    
+
     def _get_worksheets(self):
         spreadsheet = (
             self.spreadsheets_api
