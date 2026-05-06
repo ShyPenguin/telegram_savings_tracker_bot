@@ -96,9 +96,9 @@ class SheetManager(ABC):
                         "rows": [
                         {
                             "values": [
-                            {"userEnteredValue": {"stringValue": "Name"}},
-                            {"userEnteredValue": {"stringValue": "Email"}},
-                            {"userEnteredValue": {"stringValue": "Age"}}
+                            {"userEnteredValue": {"stringValue": "Date"}},
+                            {"userEnteredValue": {"stringValue": "Amount"}},
+                            {"userEnteredValue": {"stringValue": "Notes"}}
                             ]
                         }
                         ],
