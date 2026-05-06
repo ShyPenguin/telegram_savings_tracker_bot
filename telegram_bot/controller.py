@@ -149,5 +149,3 @@ class SpreadSheetController:
             return
         
         await update.message.reply_text(f"Active worksheet changed to: {self.spreadsheet_service.get_active_worksheet()}")
-
-        

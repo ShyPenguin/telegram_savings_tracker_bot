@@ -38,4 +38,25 @@ class SpreadSheetService(SheetManager):
         )
         
         return message
-        
+    
+    def delete_item(self, row_index: int):
+        worksheet = self._get_worksheet_by_title(self.get_active_worksheet())
+        request = {
+            "requests": [
+                {
+                    "deleteDimension": {
+                        "range": {
+                            "sheetId": worksheet["sheetId"],
+                            "dimension": "ROWS",
+                            "startIndex": row_index,
+                            "endIndex": row_index + 1
+                        }
+                    }
+                }
+            ]
+        }
+
+        self.spreadsheets_api.batchUpdate(
+            spreadsheetId=self.spreadsheet_id,
+            body=request
+        ).execute()

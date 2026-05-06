@@ -129,7 +129,8 @@ class SheetManager(ABC):
             spreadsheetId=self.spreadsheet_id,
             body=request
         ).execute()
-        
+
+# Depreciated we use initialize worksheet
     def _set_header_row(self, worksheet_title):
         values = [
             ["Date", "Amount", "Notes", "Total"]
@@ -141,7 +142,8 @@ class SheetManager(ABC):
             valueInputOption="RAW",
             body={"values": values}
         ).execute()
-        
+
+# Depreciated we use initialize worksheet
     def _format_column_as_peso(self, sheet_id):
         request = {
             "requests": [
