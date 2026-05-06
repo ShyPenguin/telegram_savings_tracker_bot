@@ -149,3 +149,9 @@ class SpreadSheetController:
             return
         
         await update.message.reply_text(f"Active worksheet changed to: {self.spreadsheet_service.get_active_worksheet()}")
+        
+    async def items_get(self, update:Update, _:ContextTypes.DEFAULT_TYPE) -> None:
+        message = self.spreadsheet_service.read_items()
+        
+        await update.message.reply_text(message) 
+        

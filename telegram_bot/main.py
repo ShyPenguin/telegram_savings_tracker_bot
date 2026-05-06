@@ -14,13 +14,18 @@ def build_application():
     app = ApplicationBuilder().token(token).build()
     
     spread_controller = SpreadSheetController()
+    # Item related
     app.add_handler(CommandHandler("item_add", spread_controller.item_add))
+    app.add_handler(CommandHandler("items_get", spread_controller.items_get))
+    # Worksheet related
     app.add_handler(CommandHandler("worksheet_add", spread_controller.worksheet_add))
     app.add_handler(CommandHandler("worksheet_delete", spread_controller.worksheet_delete))
     app.add_handler(CommandHandler("worksheets_get", spread_controller.worksheets_get))
     app.add_handler(CommandHandler("active_worksheet", spread_controller.active_worksheet))
+    # Summary
     app.add_handler(CommandHandler("filter", spread_controller.filter))
     app.add_handler(CommandHandler("summary", spread_controller.summary))
+    
     app.add_handler(CommandHandler("help", spread_controller.help))
     app.add_handler(CommandHandler("hello", spread_controller.hello))
     return app

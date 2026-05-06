@@ -21,7 +21,18 @@ class SpreadSheetService(SheetManager):
         ).execute()
 
         print(f"{result.get('updates').get('updatedCells')} cells appended.")
+    
+    def read_items(self):
+        data = self.read_worksheet()
+        message = f"{self.get_active_worksheet()}'s items:\n"
         
+        message += f"{data[0][0]}\t\t {data[0][1]}\t\t {data[0][2]}\n"
+        for i in range(1, len(data)):
+            message += f"{i}: {data[i][0]}\t {data[i][1]}\t {data[i][2]}\n"
+            
+        return message
+    
+    
     def filter_items_by_date(self, start_date: datetime, end_date: datetime) -> str:
         data = self.read_worksheet()
         filtered_items = filter_items(data, start_date, end_date)
