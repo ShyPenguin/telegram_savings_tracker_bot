@@ -16,6 +16,8 @@ class SpreadSheetController:
         message = (
             "Available commands:\n"
             "/item_add <amount> <note> - Append a new savings entry\n"
+            "/items_delete <id> - Deletes a saving\n"
+            "/items_get tail=<tail> head=<head> - Lists items\n"
             "/worksheet_add <title> - Add a new worksheet\n"
             "/worksheet_delete <title> - Delete a worksheet\n"
             "/worksheets_get - Lists all worksheet\n"
@@ -32,7 +34,7 @@ class SpreadSheetController:
     async def item_add(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args or len(context.args) < 2:
             await update.message.reply_text(  # type: ignore
-                "Usage: /add <amount> <note>\nExample: /add 250 groceries"
+                "Usage: /item_add <amount> <note>\nExample: /item_add 250 groceries"
             )
             return
 
@@ -56,6 +58,32 @@ class SpreadSheetController:
             values=values
         )
         await update.message.reply_text("Item appended successfully.")  # type: ignore
+    
+    async def items_delete(self, update:Update, context:ContextTypes.DEFAULT_TYPE) -> None:
+        if not context.args or len(context.args) > 1:
+            await update.message.reply_text(  # type: ignore
+                "Usage: /items_delete <id>\nExample: /items_delete 5"
+            )
+            return
+        id = context.args[0]
+        try:
+            id = int(context.args[0])
+        except ValueError:
+            await update.message.reply_text("ID must be a number")
+            return
+        
+        self.spreadsheet_service.delete_item(row_index=id)
+        await update.message.reply_text("Item deleted successfully.\n(Kindly check the items again through /items_get)")
+        
+    async def items_get(self, update:Update, context:ContextTypes.DEFAULT_TYPE) -> None:
+        head, tail = parse_items_get_args(context.args)
+        if head is not None and tail is not None:
+            await update.message.reply_text(f"Usage /items_get head=<head> OR /items_get tail=<tail>")
+            return
+        message = self.spreadsheet_service.read_items(head=head, tail=tail)
+        
+        await update.message.reply_text(message) 
+        
         
 # Arg: title=str
     async def worksheet_add(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -148,13 +176,4 @@ class SpreadSheetController:
             return
         
         await update.message.reply_text(f"Active worksheet changed to: {self.spreadsheet_service.get_active_worksheet()}")
-        
-    async def items_get(self, update:Update, context:ContextTypes.DEFAULT_TYPE) -> None:
-        head, tail = parse_items_get_args(context.args)
-        if head is not None and tail is not None:
-            await update.message.reply_text(f"Usage /items_get head=<head> OR /items_get tail=<tail>")
-            return
-        message = self.spreadsheet_service.read_items(head=head, tail=tail)
-        
-        await update.message.reply_text(message) 
         

@@ -16,6 +16,7 @@ def build_application():
     spread_controller = SpreadSheetController()
     # Item related
     app.add_handler(CommandHandler("item_add", spread_controller.item_add))
+    app.add_handler(CommandHandler("items_delete", spread_controller.items_delete))
     app.add_handler(CommandHandler("items_get", spread_controller.items_get))
     # Worksheet related
     app.add_handler(CommandHandler("worksheet_add", spread_controller.worksheet_add))
