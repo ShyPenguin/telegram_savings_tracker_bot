@@ -31,17 +31,17 @@ def parse_filter_args(
         
     return start_date, end_date
 
-def parse_items_get_args(args: list[str]) -> tuple[Optional[str], Optional[str]]:
-    head=None
-    tail=None
+def parse_items_get_args(args: list[str]) -> tuple[Optional[int], Optional[int]]:
+    head = None
+    tail = None
     
     for arg in args:
-        match arg:
-            case arg.startswith("head="):
-                head = arg.split("=", 1)[1]
-            case arg.startswith("tail="):
-                tail = arg.split("=", 1)[1]
-            
-    head = int(head) if head is not None else head
-    tail = int(tail) if head is not None else tail
+        match arg.split("=", 1):
+            case ["head", value]:
+                head = int(value)
+            case ["tail", value]:
+                tail = int(value)
+            case _:
+                pass 
+    
     return head, tail

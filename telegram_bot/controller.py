@@ -153,6 +153,7 @@ class SpreadSheetController:
         head, tail = parse_items_get_args(context.args)
         if head is not None and tail is not None:
             await update.message.reply_text(f"Usage /items_get head=<head> OR /items_get tail=<tail>")
+            return
         message = self.spreadsheet_service.read_items(head=head, tail=tail)
         
         await update.message.reply_text(message) 
