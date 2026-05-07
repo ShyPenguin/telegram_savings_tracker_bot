@@ -1,8 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from datetime import datetime
-from .helper import parse_filter_args
-import json
+from .helper import parse_filter_args, parse_items_get_args
 
 from gs_savings_tracker import SpreadSheetService
 
@@ -150,8 +149,11 @@ class SpreadSheetController:
         
         await update.message.reply_text(f"Active worksheet changed to: {self.spreadsheet_service.get_active_worksheet()}")
         
-    async def items_get(self, update:Update, _:ContextTypes.DEFAULT_TYPE) -> None:
-        message = self.spreadsheet_service.read_items()
+    async def items_get(self, update:Update, context:ContextTypes.DEFAULT_TYPE) -> None:
+        head, tail = parse_items_get_args(context.args)
+        if head is not None and tail is not None:
+            await update.message.reply_text(f"Usage /items_get head=<head> OR /items_get tail=<tail>")
+        message = self.spreadsheet_service.read_items(head=head, tail=tail)
         
         await update.message.reply_text(message) 
         

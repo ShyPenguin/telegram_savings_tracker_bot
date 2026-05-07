@@ -1,6 +1,8 @@
+from gs_savings_tracker.models import Savings
+
 from .filter import filter_by_purchase
 
-def sum_data(data: list, has_header=False):
+def sum_data(data: list[Savings]) -> int:
     """
     Sums the values in the second column of data.
     [date, amount, note, total_amount]
@@ -8,10 +10,7 @@ def sum_data(data: list, has_header=False):
     total = 0.0
     try:
         for row in data:
-            if has_header:
-                has_header = False # skips the header row
-                continue
-            amount_str = row[1]
+            amount_str = row.amount
             amount = float(amount_str.replace(",", "").replace("₱", ""))
             total += amount
     except Exception as e:
@@ -19,12 +18,12 @@ def sum_data(data: list, has_header=False):
 
     return total
 
-def summarize_items(data: list):
+def summarize_items(data: list[Savings]):
     income_items = filter_by_purchase(data, positive=True)
     expense_items = filter_by_purchase(data, positive=False)
     income_total = sum_data(income_items)
     expense_total = sum_data(expense_items)
-    net_total = sum_data(data, has_header=True)
+    net_total = sum_data(data)
     
     return {
         "count": len(data),

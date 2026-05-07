@@ -1,11 +1,11 @@
+import os
 from abc import ABC
 from dotenv import load_dotenv
-import os
 from utils.index import extract_google_doc_id
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from .helpers import summarize_items
-
+from gs_savings_tracker.models import Savings
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(env_path)
@@ -49,15 +49,29 @@ class SheetManager(ABC):
             
         return worksheets_titles
     
-    def read_worksheet(self):
+    def read_worksheet(self) -> list[Savings]:
         self._ensure_target_worksheet_exists(self._active_worksheet_title)
         result = self.spreadsheets_api.values().get(
             spreadsheetId=self.spreadsheet_id, range=self._active_worksheet_title
         ).execute()
         values = result.get("values", [])
-        # ignores empty cells
-        values = [row for row in values if any(cell.strip() for cell in row)]
-        return values
+        new_values = []  # Create a new list to store filtered rows
+        
+        for i in range(1, len(values)):
+            row = values[i]
+            has_content = False
+            
+            for cell in row:
+            # ignores empty cells
+                if cell.strip():
+                    has_content = True
+                    break
+            
+            if has_content:
+                item = Savings(i, row[0], row[1], row[2])
+                new_values.append(item)
+                
+        return new_values
         
     def add_worksheet(self, title: str):
         request = {

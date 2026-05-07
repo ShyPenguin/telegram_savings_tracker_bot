@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from typing import Optional
 
 def parse_filter_args(
     args: list[str],
@@ -26,7 +26,22 @@ def parse_filter_args(
         elif arg.startswith("end_year="):
             end_year = arg.split("=", 1)[1]
 
-        start_date = datetime.strptime(start_month + "/"  + start_day + "/" + start_year, "%m/%d/%Y")
-        end_date = datetime.strptime(end_month + "/"  + end_day + "/" + end_year, "%m/%d/%Y") 
+    start_date = datetime.strptime(start_month + "/"  + start_day + "/" + start_year, "%m/%d/%Y")
+    end_date = datetime.strptime(end_month + "/"  + end_day + "/" + end_year, "%m/%d/%Y") 
         
     return start_date, end_date
+
+def parse_items_get_args(args: list[str]) -> tuple[Optional[str], Optional[str]]:
+    head=None
+    tail=None
+    
+    for arg in args:
+        match arg:
+            case arg.startswith("head="):
+                head = arg.split("=", 1)[1]
+            case arg.startswith("tail="):
+                tail = arg.split("=", 1)[1]
+            
+    head = int(head) if head is not None else head
+    tail = int(tail) if head is not None else tail
+    return head, tail

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from .helpers import filter_items, summarize_items
+from .helpers import filter_items, summarize_items, list_head, list_tail
 
 from .sheet_manager import SheetManager
 
@@ -22,13 +22,19 @@ class SpreadSheetService(SheetManager):
 
         print(f"{result.get('updates').get('updatedCells')} cells appended.")
     
-    def read_items(self):
+    def read_items(self, head: int=None, tail: int=None):
         data = self.read_worksheet()
+        
+        if head is not None:
+            data = list_head(data, num=head)
+        if tail is not None:
+            data = list_tail(data, num=tail)
+            
         message = f"{self.get_active_worksheet()}'s items:\n"
         
-        message += f"{data[0][0]}\t\t {data[0][1]}\t\t {data[0][2]}\n"
-        for i in range(1, len(data)):
-            message += f"{i}: {data[i][0]}\t {data[i][1]}\t {data[i][2]}\n"
+        message += f"Date\t\t Amount\t\t Notes\n"
+        for row in data:
+            message += f"{row.id}: {row.date}\t {row.amount}\t {row.note}\n"
             
         return message
     
