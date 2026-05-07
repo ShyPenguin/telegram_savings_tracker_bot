@@ -14,27 +14,35 @@ class SpreadSheetController:
         
     async def help(_, update:Update, _c: ContextTypes.DEFAULT_TYPE) -> None:
         message = (
-            "Available commands:\n"
-            "/item_add <amount> <note> - Append a new savings entry\n"
+            "Available commands:\n\n"
+
+            "Items Commands:\n"
+            "/items_add <amount> <note> - Append a new savings entry\n"
             "/items_delete <id> - Deletes a saving\n"
-            "/items_get tail=<tail> head=<head> - Lists items\n"
-            "/worksheet_add <title> - Add a new worksheet\n"
-            "/worksheet_delete <title> - Delete a worksheet\n"
-            "/worksheets_get - Lists all worksheet\n"
+            "/items_get tail=<tail> head=<head> - Lists items\n\n"
+            
+            "Worksheets Commands:\n"
+            "/worksheets_add <title> - Add a new worksheet\n"
+            "/worksheets_delete <title> - Delete a worksheet\n"
+            "/worksheets_get - Lists all worksheet\n\n"
+            
+            "Active Worksheet Commands:\n"
             "/active_worksheet - Show active worksheet\n"
-            "/active_worksheet <title> - Change active worksheet\n"
+            "/active_worksheet <title> - Change active worksheet\n\n"
+            "Other Commands:\n"
             "/filter start_day=<d> start_month=<m> start_year=<y>"
             "end_day=<d> end_month=<m> end_year=<y> - Filter and summarize\n"
+            "/summary - Summarizes the active worksheet\n"
             "/help - Show this message"
         )
         
         await update.message.reply_text(message)
         
 #Arg: amount=str note=str
-    async def item_add(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def items_add(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args or len(context.args) < 2:
             await update.message.reply_text(  # type: ignore
-                "Usage: /item_add <amount> <note>\nExample: /item_add 250 groceries"
+                "Usage: /items_add <amount> <note>\nExample: /items_add 250 groceries"
             )
             return
 
@@ -86,10 +94,10 @@ class SpreadSheetController:
         
         
 # Arg: title=str
-    async def worksheet_add(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def worksheets_add(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args:
             await update.message.reply_text(  # type: ignore
-                "Usage: /worksheet_add <worksheet_title> \nExample: /worksheet_add Sheet2"
+                "Usage: /worksheets_add <worksheet_title> \nExample: /worksheets_add Sheet2"
             )
             return
         title = context.args[0]
@@ -105,10 +113,10 @@ class SpreadSheetController:
         
         await update.message.reply_text(f"Sheet: {title} added successfully")
 
-    async def worksheet_delete(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def worksheets_delete(self, update:Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args:
             await update.message.reply_text(  # type: ignore
-                "Usage: /worksheet_delete <worksheet_title> \nExample: /worksheet_delete Sheet2"
+                "Usage: /worksheets_delete <worksheet_title> \nExample: /worksheets_delete Sheet2"
             )
             return
         

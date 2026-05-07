@@ -15,12 +15,12 @@ def build_application():
     
     spread_controller = SpreadSheetController()
     # Item related
-    app.add_handler(CommandHandler("item_add", spread_controller.item_add))
+    app.add_handler(CommandHandler("items_add", spread_controller.items_add))
     app.add_handler(CommandHandler("items_delete", spread_controller.items_delete))
     app.add_handler(CommandHandler("items_get", spread_controller.items_get))
     # Worksheet related
-    app.add_handler(CommandHandler("worksheet_add", spread_controller.worksheet_add))
-    app.add_handler(CommandHandler("worksheet_delete", spread_controller.worksheet_delete))
+    app.add_handler(CommandHandler("worksheets_add", spread_controller.worksheets_add))
+    app.add_handler(CommandHandler("worksheets_delete", spread_controller.worksheets_delete))
     app.add_handler(CommandHandler("worksheets_get", spread_controller.worksheets_get))
     app.add_handler(CommandHandler("active_worksheet", spread_controller.active_worksheet))
     # Summary
