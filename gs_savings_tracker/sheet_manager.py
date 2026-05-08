@@ -31,12 +31,12 @@ class SheetManager(ABC):
     def get_active_worksheet(self)-> Worksheet:
         return self._active_worksheet
 
-    def set_active_worksheet(self, title):
+    def set_active_worksheet(self, title) -> None:
         target_worksheet = self._get_worksheet_by_title(title)
         print(f"Setting active worksheet to {title}...")
         self._active_worksheet = target_worksheet
     
-    def get_worksheets_title(self):
+    def get_worksheets_title(self) -> list[str]:
         worksheets = self._get_worksheets()
         
         worksheets_titles = []
@@ -73,7 +73,7 @@ class SheetManager(ABC):
                 
         return new_values
         
-    def add_worksheet(self, title: str):
+    def add_worksheet(self, title: str) -> str:
         request = {
             "requests": [
                 {
@@ -96,7 +96,7 @@ class SheetManager(ABC):
         worksheet_title = worksheet_properties["title"]
         return worksheet_title
     
-    def _initialize_worksheet(self, sheet_id):
+    def _initialize_worksheet(self, sheet_id) -> None:
         request = {
             "requests": [
                 {

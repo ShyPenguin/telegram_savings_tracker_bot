@@ -22,7 +22,7 @@ class SpreadSheetService(SheetManager):
 
         print(f"{result.get('updates').get('updatedCells')} cells appended.")
     
-    def read_items(self, head: int=None, tail: int=None):
+    def read_items(self, head: int=None, tail: int=None) -> str:
         data = self.read_worksheet()
         
         if head is not None:
@@ -56,7 +56,7 @@ class SpreadSheetService(SheetManager):
         
         return message
     
-    def delete_item(self, row_index: int):
+    def delete_item(self, row_index: int) -> None:
         active_worksheet = self.get_active_worksheet()
         request = {
             "requests": [
