@@ -121,7 +121,7 @@ class SpreadSheetController:
             return
         
         title = context.args[0]
-        if title == self.spreadsheet_service.get_active_worksheet():
+        if title == self.spreadsheet_service.get_active_worksheet().title:
             await update.message.reply_text("Cannot delete active worksheet")
             return
         
@@ -160,7 +160,7 @@ class SpreadSheetController:
         
         if not context.args:
             await update.message.reply_text(  # type: ignore
-                f"Active worksheet: {self.spreadsheet_service.get_active_worksheet()}"
+                f"Active worksheet: {self.spreadsheet_service.get_active_worksheet().title}"
             )
             return
     
@@ -183,5 +183,5 @@ class SpreadSheetController:
             )
             return
         
-        await update.message.reply_text(f"Active worksheet changed to: {self.spreadsheet_service.get_active_worksheet()}")
+        await update.message.reply_text(f"Active worksheet changed to: {self.spreadsheet_service.get_active_worksheet().title}")
         

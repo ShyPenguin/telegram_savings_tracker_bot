@@ -28,13 +28,13 @@ class SheetManager(ABC):
         )
         return creds
     
-    def get_active_worksheet(self):
-        return self._active_worksheet.title
+    def get_active_worksheet(self)-> ActiveWorkSheet:
+        return self._active_worksheet
 
     def set_active_worksheet(self, title):
-        self._ensure_target_worksheet_exists(title)
+        target_worksheet = self._get_worksheet_by_title(title)
         print(f"Setting active worksheet to {title}...")
-        self._active_worksheet.title = title
+        self._active_worksheet = ActiveWorkSheet(title=target_worksheet["title"], id=target_worksheet["sheetId"]) 
     
     def get_worksheets_title(self):
         worksheets = self._get_worksheets()
@@ -50,7 +50,7 @@ class SheetManager(ABC):
         return worksheets_titles
     
     def read_worksheet(self) -> list[Savings]:
-        self._ensure_target_worksheet_exists(self._active_worksheet.title)
+        self._get_worksheet_by_title(self._active_worksheet.title)
         result = self.spreadsheets_api.values().get(
             spreadsheetId=self.spreadsheet_id, range=self._active_worksheet.title
         ).execute()
@@ -103,7 +103,7 @@ class SheetManager(ABC):
                 {
                     "updateCells": {
                         "start": {
-                        "sheetId": sheet_id,  # tricky part!
+                        "sheetId": sheet_id,
                         "rowIndex": 0,
                         "columnIndex": 0
                         },
@@ -236,10 +236,3 @@ class SheetManager(ABC):
         )
         return [sheet['properties'] for sheet in spreadsheet["sheets"]]
       
-    def _ensure_target_worksheet_exists(self, target_worksheet: str):
-        worksheets = self._get_worksheets()
-        worksheet_titles = list(map(lambda worksheet: worksheet["title"], worksheets))
-        if target_worksheet not in worksheet_titles:
-            raise ValueError(f"Target sheet '{target_worksheet}' does not exist.")
-        
-    

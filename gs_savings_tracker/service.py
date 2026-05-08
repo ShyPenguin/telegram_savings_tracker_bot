@@ -14,7 +14,7 @@ class SpreadSheetService(SheetManager):
         }
         result = self.spreadsheets_api.values().append(
             spreadsheetId=self.spreadsheet_id,
-            range=self.get_active_worksheet(),
+            range=self.get_active_worksheet().title,
             valueInputOption="USER_ENTERED",
             insertDataOption="INSERT_ROWS",  # ensures new rows are added
             body=body
@@ -30,7 +30,7 @@ class SpreadSheetService(SheetManager):
         if tail is not None:
             data = list_tail(data, num=tail)
             
-        message = f"{self.get_active_worksheet()}'s items:\n"
+        message = f"{self.get_active_worksheet().title}'s items:\n"
         
         message += f"Date\t\t Amount\t\t Notes\n"
         for row in data:
@@ -45,7 +45,7 @@ class SpreadSheetService(SheetManager):
         filtered_summary = summarize_items(filtered_items)
         
         message = (
-            f"Filtered ({self.get_active_worksheet()})\n"
+            f"Filtered ({self.get_active_worksheet().title})\n"
             f"- Items: {filtered_summary['count']}\n"
             f"- Income: ₱{filtered_summary['income_total']:,.2f}\n"
             f"- Expense: ₱{filtered_summary['expense_total']*-1:,.2f}\n"
@@ -57,13 +57,13 @@ class SpreadSheetService(SheetManager):
         return message
     
     def delete_item(self, row_index: int):
-        worksheet = self._get_worksheet_by_title(self.get_active_worksheet())
+        active_worksheet = self.get_active_worksheet()
         request = {
             "requests": [
                 {
                     "deleteDimension": {
                         "range": {
-                            "sheetId": worksheet["sheetId"],
+                            "sheetId": active_worksheet.id,
                             "dimension": "ROWS",
                             "startIndex": row_index,
                             "endIndex": row_index + 1
