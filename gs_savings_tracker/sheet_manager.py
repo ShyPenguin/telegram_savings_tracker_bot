@@ -5,7 +5,7 @@ from utils.index import extract_google_doc_id
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from .helpers import summarize_items
-from gs_savings_tracker.models import Savings
+from gs_savings_tracker.models import Savings, ActiveWorkSheet
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(env_path)
@@ -19,7 +19,7 @@ class SheetManager(ABC):
         self.creds = self._get_credentials()
         self.spreadsheet_id = extract_google_doc_id(os.getenv("SPREADSHEET_URL"))
         self.spreadsheets_api = build("sheets", "v4", credentials=self.creds).spreadsheets()
-        self._active_worksheet_title = "Sheet1";
+        self._active_worksheet = ActiveWorkSheet(title="Sheet1", id="0")
 
     def _get_credentials(self):
         creds = Credentials.from_service_account_file(
@@ -29,20 +29,20 @@ class SheetManager(ABC):
         return creds
     
     def get_active_worksheet(self):
-        return self._active_worksheet_title
+        return self._active_worksheet.title
 
     def set_active_worksheet(self, title):
         self._ensure_target_worksheet_exists(title)
         print(f"Setting active worksheet to {title}...")
-        self._active_worksheet_title = title
+        self._active_worksheet.title = title
     
     def get_worksheets_title(self):
         worksheets = self._get_worksheets()
         
         worksheets_titles = []
         for worksheet in worksheets:
-            if worksheet["title"] == self._active_worksheet_title:
-                worksheets_titles.append(f"{self._active_worksheet_title} (active)")
+            if worksheet["title"] == self._active_worksheet.title:
+                worksheets_titles.append(f"{self._active_worksheet.title} (active)")
                 continue
             
             worksheets_titles.append(worksheet["title"])
@@ -50,9 +50,9 @@ class SheetManager(ABC):
         return worksheets_titles
     
     def read_worksheet(self) -> list[Savings]:
-        self._ensure_target_worksheet_exists(self._active_worksheet_title)
+        self._ensure_target_worksheet_exists(self._active_worksheet.title)
         result = self.spreadsheets_api.values().get(
-            spreadsheetId=self.spreadsheet_id, range=self._active_worksheet_title
+            spreadsheetId=self.spreadsheet_id, range=self._active_worksheet.title
         ).execute()
         values = result.get("values", [])
         new_values = []  # Create a new list to store filtered rows
@@ -212,7 +212,7 @@ class SheetManager(ABC):
         summary_data = summarize_items(data)
         
         message = (
-            f"Summary ({self._active_worksheet_title})\n"
+            f"Summary ({self._active_worksheet.title})\n"
             f"- Count: {summary_data['count']}\n"
             f"- Income: ₱{summary_data['income_total']:,.2f}\n"
             f"- Expense: ₱{summary_data['expense_total']*-1:,.2f}\n"
