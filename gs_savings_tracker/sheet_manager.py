@@ -5,7 +5,7 @@ from utils.index import extract_google_doc_id
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from .helpers import summarize_items
-from gs_savings_tracker.models import Savings, ActiveWorkSheet
+from gs_savings_tracker.models import Savings, Worksheet
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(env_path)
@@ -19,7 +19,7 @@ class SheetManager(ABC):
         self.creds = self._get_credentials()
         self.spreadsheet_id = extract_google_doc_id(os.getenv("SPREADSHEET_URL"))
         self.spreadsheets_api = build("sheets", "v4", credentials=self.creds).spreadsheets()
-        self._active_worksheet = ActiveWorkSheet(title="Sheet1", id="0")
+        self._active_worksheet = Worksheet(title="Sheet1", id="0")
 
     def _get_credentials(self):
         creds = Credentials.from_service_account_file(
@@ -28,13 +28,13 @@ class SheetManager(ABC):
         )
         return creds
     
-    def get_active_worksheet(self)-> ActiveWorkSheet:
+    def get_active_worksheet(self)-> Worksheet:
         return self._active_worksheet
 
     def set_active_worksheet(self, title):
         target_worksheet = self._get_worksheet_by_title(title)
         print(f"Setting active worksheet to {title}...")
-        self._active_worksheet = ActiveWorkSheet(title=target_worksheet["title"], id=target_worksheet["sheetId"]) 
+        self._active_worksheet = target_worksheet
     
     def get_worksheets_title(self):
         worksheets = self._get_worksheets()
@@ -95,7 +95,6 @@ class SheetManager(ABC):
         self._initialize_worksheet(worksheet_properties["sheetId"])
         worksheet_title = worksheet_properties["title"]
         return worksheet_title
-    
     
     def _initialize_worksheet(self, sheet_id):
         request = {
@@ -194,7 +193,7 @@ class SheetManager(ABC):
             "requests": [
                 {
                     "deleteSheet": {
-                        "sheetId": worksheet["sheetId"]
+                        "sheetId": worksheet.id
                     }
                 }
             ]
@@ -221,12 +220,13 @@ class SheetManager(ABC):
             
         return message
         
-    def _get_worksheet_by_title(self, title: str) -> list[str]:
+    def _get_worksheet_by_title(self, title: str) -> Worksheet:
         worksheets = self._get_worksheets()
         filtered_worksheets = list(filter(lambda worksheet: worksheet["title"] == title, worksheets))
         if len(filtered_worksheets) < 1:
             raise ValueError(f"Target sheet `{title}` does not exist.")
-        return filtered_worksheets[0]
+        
+        return Worksheet(filtered_worksheets[0]["title"], filtered_worksheets[0]["sheetId"])
 
     def _get_worksheets(self):
         spreadsheet = (

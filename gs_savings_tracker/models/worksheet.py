@@ -1,5 +1,5 @@
 
-class ActiveWorkSheet():
+class Worksheet():
     
     def __init__(self, title, id):
         self.title = title
