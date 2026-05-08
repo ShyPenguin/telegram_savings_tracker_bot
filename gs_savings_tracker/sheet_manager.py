@@ -17,7 +17,7 @@ class SheetManager(ABC):
         self.auth_path = os.path.join(os.getcwd(), "auth")
         self.credentials_path = os.path.join(self.auth_path, "service_credentials.json")
         self.creds = self._get_credentials()
-        self.spreadsheet_id = extract_google_doc_id(os.getenv("TEST_URL"))
+        self.spreadsheet_id = extract_google_doc_id(os.getenv("SPREADSHEET_URL"))
         self.spreadsheets_api = build("sheets", "v4", credentials=self.creds).spreadsheets()
         self._active_worksheet_title = "Sheet1";
 
