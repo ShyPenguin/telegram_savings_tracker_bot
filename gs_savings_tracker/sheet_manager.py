@@ -41,11 +41,11 @@ class SheetManager(ABC):
         
         worksheets_titles = []
         for worksheet in worksheets:
-            if worksheet["title"] == self._active_worksheet.title:
+            if worksheet.title == self._active_worksheet.title:
                 worksheets_titles.append(f"{self._active_worksheet.title} (active)")
                 continue
             
-            worksheets_titles.append(worksheet["title"])
+            worksheets_titles.append(worksheet.title)
             
         return worksheets_titles
     
@@ -222,17 +222,21 @@ class SheetManager(ABC):
         
     def _get_worksheet_by_title(self, title: str) -> Worksheet:
         worksheets = self._get_worksheets()
-        filtered_worksheets = list(filter(lambda worksheet: worksheet["title"] == title, worksheets))
+        filtered_worksheets = list(filter(lambda worksheet: worksheet.title == title, worksheets))
         if len(filtered_worksheets) < 1:
             raise ValueError(f"Target sheet `{title}` does not exist.")
         
-        return Worksheet(filtered_worksheets[0]["title"], filtered_worksheets[0]["sheetId"])
+        return filtered_worksheets[0]
 
-    def _get_worksheets(self):
+    def _get_worksheets(self) -> list[Worksheet]:
         spreadsheet = (
             self.spreadsheets_api
             .get(spreadsheetId=self.spreadsheet_id)
             .execute()
         )
-        return [sheet['properties'] for sheet in spreadsheet["sheets"]]
+        
+        
+        return list(map(lambda sheet: Worksheet(title=sheet["properties"]["title"], 
+                                                id=sheet["properties"]["sheetId"]), 
+                        spreadsheet["sheets"]))
       

@@ -122,7 +122,13 @@ class SpreadSheetController:
         
         title = context.args[0]
         if title == self.spreadsheet_service.get_active_worksheet().title:
-            await update.message.reply_text("Cannot delete active worksheet")
+            message = (
+                f"Cannot delete active worksheet\n"
+                f"Change active worksheet to another worksheet\n"
+                f"Example:\n"
+                f"/active_worksheet Sheet1"
+            )
+            await update.message.reply_text(message)
             return
         
         try:
