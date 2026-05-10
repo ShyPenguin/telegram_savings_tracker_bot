@@ -33,6 +33,6 @@ def build_application():
 
 
 def main(): 
-    print("Savings tracker bot is running...")
     app = build_application()
+    print("Savings tracker bot is running...")
     app.run_polling()

@@ -5,7 +5,7 @@ from utils.index import extract_google_doc_id
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from .helpers import summarize_items
-from gs_savings_tracker.models import Savings, Worksheet
+from gs_savings_tracker.models import Savings, Worksheet, ActiveWorksheet
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(env_path)
@@ -19,7 +19,10 @@ class SheetManager(ABC):
         self.creds = self._get_credentials()
         self.spreadsheet_id = extract_google_doc_id(os.getenv("SPREADSHEET_URL"))
         self.spreadsheets_api = build("sheets", "v4", credentials=self.creds).spreadsheets()
-        self._active_worksheet = Worksheet(title="Sheet1", id="0")
+        self._active_worksheet = ActiveWorksheet.load()
+        if self._active_worksheet.has_cache() is False:
+            worksheets = self._get_worksheets()
+            self._active_worksheet.set(title=worksheets[0].title, id=worksheets[0].id)
 
     def _get_credentials(self):
         creds = Credentials.from_service_account_file(
@@ -31,10 +34,11 @@ class SheetManager(ABC):
     def get_active_worksheet(self)-> Worksheet:
         return self._active_worksheet
 
+
     def set_active_worksheet(self, title) -> None:
         target_worksheet = self._get_worksheet_by_title(title)
         print(f"Setting active worksheet to {title}...")
-        self._active_worksheet = target_worksheet
+        self._active_worksheet.set(title=target_worksheet.title, id=target_worksheet.id)
     
     def get_worksheets_title(self) -> list[str]:
         worksheets = self._get_worksheets()
