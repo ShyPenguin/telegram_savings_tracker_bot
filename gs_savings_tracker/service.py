@@ -30,13 +30,27 @@ class SpreadSheetService(SheetManager):
         if tail is not None:
             data = list_tail(data, num=tail)
             
-        message = f"{self.get_active_worksheet().title}'s items:\n"
-        
-        message += f"Date\t\t Amount\t\t Notes\n"
+        message = (
+            f"```{self.get_active_worksheet().title}\n"
+            f"{'ID':<5} {'Date':<12} {'Amount':<12} {'Notes'}\n"
+        )
+    
         for row in data:
-            message += f"{row.id}: {row.date}\t {row.amount}\t {row.note}\n"
-            
+            row.note = (
+                row.note[:19] + "..."
+                if len(row.note) > 22
+                else row.note
+            )
+            message += (
+                f"{str(row.id):<5} "
+                f"{str(row.date):<12} "
+                f"{str(row.amount):<12} "
+                f"{row.note}\n"
+            )
+
+        message += "```"
         return message
+    
     
     
     def filter_items_by_date(self, start_date: datetime, end_date: datetime) -> str:

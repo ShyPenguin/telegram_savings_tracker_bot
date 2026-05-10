@@ -1,4 +1,5 @@
 from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 from datetime import datetime
 from .helper import parse_filter_args, parse_items_get_args
@@ -90,7 +91,7 @@ class SpreadSheetController:
             return
         message = self.spreadsheet_service.read_items(head=head, tail=tail)
         
-        await update.message.reply_text(message) 
+        await update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN_V2) 
         
         
 # Arg: title=str
